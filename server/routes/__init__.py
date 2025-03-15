@@ -7,4 +7,5 @@ def register_blueprints(app,db,fs):
     reciept_bp.fs = fs
     app.register_blueprint(auth_bp, url_prefix='/auth')
     auth_bp.db =db
+
     

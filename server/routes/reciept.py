@@ -41,4 +41,25 @@ def getAllEntries():
         return list(db.inventory.find({}))
     except Exception as e:
         return jsonify({"error": str(e)})
+    
+@reciept_bp.route('/deleteEntry',methods = ["DELETE"])
+@jwt_required()
+def deleteEntry():
+    try:
+        db = reciept_bp.db
+        id = request.args.get('id')
+        db.inventory.delete_one({"_id":id})
+        return jsonify({"message": "Deleted successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+@reciept_bp.route('/selectEntry',methods = ["GET"])
+@jwt_required()
+def selectEntry():
+    try:
+        db = reciept_bp.db
+        id = request.args.get('id')
+        return db.inventory.find_one({"_id":id})
+    except Exception as e:
+        return jsonify({"error": str(e)})
         

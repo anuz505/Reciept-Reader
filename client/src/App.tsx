@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/layouts/Protected";
 import { DashboardLayout } from "./components/layouts/DashboardLayout";
 import NotFound from "./pages/NotFound";
 import RedirectIfAuthenticated from "./pages/auth/RedirectIfAuthenticated";
+import RegisterAuth from "./pages/auth/Register";
 function App() {
   const { user, isAuthenticated, isLoading, verifyAuthentication } = useAuth();
   useEffect(() => {
@@ -31,7 +32,14 @@ function App() {
             </RedirectIfAuthenticated>
           }
         />
-        {/* <Route path="register" element={<Register />} /> */}
+        <Route
+          path="/auth/register"
+          element={
+            <RedirectIfAuthenticated>
+              <RegisterAuth />
+            </RedirectIfAuthenticated>
+          }
+        />
 
         {/* Protected Dashboard Routes */}
         <Route

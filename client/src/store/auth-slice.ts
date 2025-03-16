@@ -1,9 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 interface Credentials {
   email: string;
   password: string;
+  username?: string;
 }
 interface User {
   id: string;
@@ -25,7 +27,8 @@ export const checkAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // Get token from localStorage as fallback
-      const token = localStorage.getItem("access_token");
+      const token =
+        localStorage.getItem("access_token") || Cookies.get("access_token");
 
       const headers: Record<string, string> = {};
       if (token) {
@@ -50,6 +53,17 @@ export const checkAuth = createAsyncThunk(
         error.message ||
         "Authentication check failed";
       return rejectWithValue(message);
+    }
+  }
+);
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (credentials: Credentials, { rejectWithValue }) => {
+    try {
+      const response = await api.post("auth/register", credentials);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -134,6 +148,17 @@ const authSlice = createSlice({
         state.status = "failed";
         state.error = action.payload as string | null;
         state.isAuthenticated = false;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string | null;
+      })
+      .addCase(registerUser.pending, (state) => {
+        (state.status = "loading"), (state.error = null);
+      })
+      .addCase(registerUser.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;

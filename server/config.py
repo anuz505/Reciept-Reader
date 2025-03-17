@@ -13,3 +13,12 @@ class Config():
     JWT_REFRESH_COOKIE_PATH = '/token/refresh'
     JWT_COOKIE_CSRF_PROTECT = True
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)  # 30-day tokens
+
+
+    # Email Configuration
+    MAIL_SERVER = "smtp.gmail.com"
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('EMAIL_USER')
+    MAIL_PASSWORD= os.environ.get('EMAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER= os.environ.get('EMAIL_USER')

@@ -16,14 +16,18 @@ def upload():
     
     image_data = file.read()
     fileID = fs.put(image_data, filename=file.filename)
-    print(image_data)
     if not image_data:
         return 'Empty file'
     img = preprocess(image_data)
     extracted_txt = extract_text(img)
     json = ai_extract(extracted_txt)
+    
+    
+
     if db is not None:  # Use `is not None` instead of `if db`
         try:
+            if "error" in json:
+                return json
             db.inventory.insert_one(json)
             return jsonify({"message": "Insertion successful"})
         except Exception as e:
@@ -33,7 +37,7 @@ def upload():
         return jsonify({"error": "Database connection error"})
     
 @reciept_bp.route('/allEntries',methods = ["GET"])
-@jwt_required()
+# @jwt_required()
 def getAllEntries():
     try:
         db = reciept_bp.db

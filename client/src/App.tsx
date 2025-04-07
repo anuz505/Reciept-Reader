@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import RedirectIfAuthenticated from "./pages/auth/RedirectIfAuthenticated";
 import RegisterAuth from "./pages/auth/Register";
 import AllReceipts from "./pages/AllReciepts";
+import ImageReciept from "./pages/RecieptDetails";
 function App() {
   const { user, isAuthenticated, isLoading, verifyAuthentication } = useAuth();
   useEffect(() => {
@@ -47,22 +48,23 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              {/* <DashboardLayout /> */}
-              <AllReceipts />
+              <DashboardLayout />
             </ProtectedRoute>
           }
         >
-          {/* Receipt Routes */}
-          {/* <Route path="receipts">
+          <Route index element={<AllReceipts />} />
+          <Route path="reciept_img/:id" element={<ImageReciept />} />
+        </Route>
+        {/* Receipt Routes */}
+        {/* <Route path="receipts">
             <Route index element={<ReceiptsHome />} />
             <Route path="upload" element={<UploadReceipt />} />
             <Route path="list" element={<ReceiptList />} />
             <Route path=":id" element={<ReceiptDetail />} />
           </Route> */}
-
-          {/* Profile Routes */}
-          {/* <Route path="logout" element={<Logout />} /> */}
-        </Route>
+        {/* Profile Routes */}
+        {/* <Route path="logout" element={<Logout />} /> */}
+        {/* </Route> */}
 
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />

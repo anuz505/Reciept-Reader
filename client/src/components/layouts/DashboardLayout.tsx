@@ -15,7 +15,7 @@ export function DashboardLayout() {
           <h1 className="text-2xl font-bold">Dashboard</h1>
         </header>
         <main className="flex-grow p-4">
-          <Outlet />
+          <Outlet /> {/* This renders the nested routes */}
         </main>
         <footer className="bg-gray-800 text-white p-4 text-center">
           <p>&copy; 2023 Your Company</p>

@@ -32,7 +32,10 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 def ai_extract(text):
     prompt = """ You are a reciept parser AI. I am going to provide you with text from a reciept and I want you to extract the following information in the this structure: {'total','bussiness','items':[{'name','price','quantity'}],'address'} also if you cannot extract the requested information from the provided text then respond with something short. """
     response = model.generate_content(prompt + text)
-    response_text = response.text.strip().replace("```json","").strip().replace("```","")
+    response_text = response.text.strip().replace("```json", "").strip().replace("```", "")
+    
+    # Ensure property names use double quotes
+    response_text = response_text.replace("'", '"')
     try:
         response_json = json.loads(response_text)
     except json.JSONDecodeError as e:

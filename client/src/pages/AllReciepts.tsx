@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
+
 interface Item {
   name: string;
   price: string;
@@ -28,10 +31,16 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
   },
 });
 
 const AllReceipts: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +55,9 @@ const AllReceipts: React.FC = () => {
         const receiptData = Array.isArray(response.data)
           ? response.data
           : [response.data]; // Convert to array if it's a single object
-
+        if (receiptData.length === 0) {
+          console.warn("No receipts found in the response.");
+        }
         // Filter out any potentially invalid entries that don't have data property
         const validReceipts = receiptData.filter(
           (receipt) => receipt && receipt.data

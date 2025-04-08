@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required,get_jwt_identity
 from services.preprocess import preprocess,extract_text,ai_extract
 from bson import ObjectId
 import base64
@@ -10,6 +10,8 @@ reciept_bp = Blueprint('reciept',__name__)
 def upload():
     db = reciept_bp.db
     fs = reciept_bp.fs
+    userID  = get_jwt_identity()
+
     if 'image' not in request.files:
         return 'no file'
     file = request.files['image']  
@@ -29,13 +31,15 @@ def upload():
     except Exception as e:
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
-    # if not isinstance(extracted_data.json, dict):
-    #     return jsonify({"error": "Invalid data format from AI extraction"}), 500
+   
 
-    # Embed the fileID inside the extracted_data JSON as an inner object
+    if "error" in extracted_data:
+                return (extracted_data),400
+
     response_data = {
         "data": extracted_data,
-        "fileID": str(fileID)
+        "fileID": str(fileID),
+        "user_id": ObjectId(userID)  
         }
 
     
@@ -44,8 +48,7 @@ def upload():
         try:
             if "error" in response_data:
                 return (response_data),400
-            if "error" in extracted_data:
-                return (extracted_data),400
+            
             db.inventory.insert_one(response_data)
             
             return jsonify({"message": "Insertion successful"})
@@ -56,12 +59,15 @@ def upload():
         return jsonify({"error": "Database connection error"})
     
 @reciept_bp.route('/allEntries',methods = ["GET"])
-# @jwt_required()
+@jwt_required()
 def getAllEntries():
     try:
+        userID = get_jwt_identity()
         db = reciept_bp.db
         
-        return list(db.inventory.find({}))
+        entries = db.inventory.find({"user_id": ObjectId(userID)})
+        return jsonify([entry for entry in entries])
+        # return jsonify([entry for entry in db.inventory.find({})])
     except Exception as e:
         return jsonify({"error": str(e)})
     

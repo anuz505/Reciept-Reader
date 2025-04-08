@@ -52,7 +52,14 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<AllReceipts />} />
+          <Route
+            index
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <AllReceipts />
+              </ProtectedRoute>
+            }
+          />
           <Route path="reciept_img/:id" element={<ImageReciept />} />
         </Route>
         {/* Receipt Routes */}

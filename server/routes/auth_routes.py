@@ -38,7 +38,7 @@ def login():
     
     user = db.users.find_one({"email": email})
     if user and check_password_hash(user['password'], password):
-        access_token = create_access_token(identity=str(user["_id"]))
+        access_token = create_access_token(identity=ObjectId(user["_id"]))
         
         # Create response with user data
         response = make_response(jsonify({

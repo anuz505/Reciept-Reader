@@ -38,7 +38,7 @@ def upload():
 
     response_data = {
         "data": extracted_data,
-        "fileID": str(fileID),
+        "fileID": ObjectId(fileID),
         "user_id": ObjectId(userID)  
         }
 
@@ -71,16 +71,36 @@ def getAllEntries():
     except Exception as e:
         return jsonify({"error": str(e)})
     
-@reciept_bp.route('/deleteEntry',methods = ["DELETE"])
+@reciept_bp.route('/deleteEntry', methods=["DELETE"])
 @jwt_required()
 def deleteEntry():
     try:
         db = reciept_bp.db
+        fs = reciept_bp.fs
         id = request.args.get('id')
-        db.inventory.delete_one({"_id":id})
-        return jsonify({"message": "Deleted successfully"})
+        
+        # Use find_one to get a single document instead of a cursor
+        receipt = db.inventory.find_one({"_id": ObjectId(id)})
+        
+        if not receipt:
+            return jsonify({"error": "Receipt not found"}), 404
+        
+        # Get the fileID from the document
+        file_id = receipt.get("fileID")
+        
+        # Delete the document from inventory collection
+        delete_result = db.inventory.delete_one({"_id": ObjectId(id)})
+        
+        # Now delete the file from GridFS using the fileID
+        if file_id:
+            fs.delete(file_id)
+        
+        return jsonify({
+            "message": "Receipt and associated file deleted successfully",
+            "deleted_count": delete_result.deleted_count
+        })
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
     
 @reciept_bp.route('/selectEntry',methods = ["GET"])
 @jwt_required()

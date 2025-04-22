@@ -72,14 +72,10 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: Credentials, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/auth/login",
-        credentials,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+      const response = await api.post("auth/login", credentials, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
 
       // Store token in localStorage as a backup
       if (response.data.access_token) {

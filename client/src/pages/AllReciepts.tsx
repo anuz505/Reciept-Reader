@@ -191,7 +191,7 @@ const AllReceipts: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-800">All Receipts</h1>
         <button
           onClick={() => setShowUploadModal(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-300 flex items-center"
+          className="bg-blue-500 hover:bg-blue-600 flex text-white font-medium py-2 px-5 rounded-lg duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -253,10 +253,10 @@ const AllReceipts: React.FC = () => {
                         Items
                       </h3>
                       <button
-                        className="bg-red-400 text-white hover:bg-red-500 flex items-center px-1 py-1 rounded mb-5"
+                        className="bg-red-400 text-white hover:bg-red-500 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 tran flex items-center px-1 py-1 rounded mb-5"
                         onClick={() => setDeleteShowModal(true)}
                       >
-                        <Trash className="mr-1" />
+                        <Trash className="mr-1 " />
                       </button>
                     </div>
                     <ul className="space-y-1 text-sm text-gray-600">
@@ -292,9 +292,18 @@ const AllReceipts: React.FC = () => {
             );
           })}
           {deleteShowModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div
+              className={`fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ${
+                deleteShowModal
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
+              }`}
+              onClick={() => {
+                setDeleteShowModal(false);
+              }}
+            >
               {/* Delete Modal */}
-              <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg transition delay-150 duration-500 ease-in-out">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-gray-800">
                     Confirm Deletion
@@ -348,8 +357,14 @@ const AllReceipts: React.FC = () => {
         </div>
       )}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div
+          className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowUploadModal(false);
+            setUploadStatus("");
+          }}
+        >
+          <div className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-300 shadow-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">
                 Upload Receipt

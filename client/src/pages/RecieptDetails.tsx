@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+
 import axios from "axios";
 import { useParams } from "react-router-dom";
 const api = axios.create({
@@ -13,6 +16,7 @@ const ImageReciept: React.FC = () => {
   const [img, setImg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
@@ -47,12 +51,21 @@ const ImageReciept: React.FC = () => {
     );
   }
   return (
-    <div className="flex justify-center items-center h-screen">
-      {img ? (
-        <img src={img} alt="Reciept" className="max-w-full max-h-full" />
-      ) : (
-        <p>No image available</p>
-      )}
+    <div>
+      <button
+        className="text-blue-600 hover:text-blue-800 text-sm font-medium flex "
+        onClick={() => navigate(`/dashboard`)}
+      >
+        <ArrowLeft />
+        Go Back
+      </button>
+      <div className="flex justify-center items-center h-screen">
+        {img ? (
+          <img src={img} alt="Reciept" className="max-w-full max-h-full" />
+        ) : (
+          <p>No image available</p>
+        )}
+      </div>
     </div>
   );
 };

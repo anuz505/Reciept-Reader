@@ -62,13 +62,7 @@ function App() {
           />
           <Route path="reciept_img/:id" element={<ImageReciept />} />
         </Route>
-        {/* Receipt Routes */}
-        {/* <Route path="receipts">
-            <Route index element={<ReceiptsHome />} />
-            <Route path="upload" element={<UploadReceipt />} />
-            <Route path="list" element={<ReceiptList />} />
-            <Route path=":id" element={<ReceiptDetail />} />
-          </Route> */}
+
         {/* Profile Routes */}
         {/* <Route path="logout" element={<Logout />} /> */}
         {/* </Route> */}

@@ -1,9 +1,9 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 export function DashboardLayout() {
   const { isAuthenticated } = useAuth();
-
+  const navigate = useNavigate();
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
@@ -12,7 +12,12 @@ export function DashboardLayout() {
     <div className="dashboard">
       <div className="flex flex-col min-h-screen">
         <header className="bg-blue-600 text-white p-4">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1
+            className="text-2xl font-bold"
+            onClick={() => navigate("/Dashboard")}
+          >
+            Dashboard
+          </h1>
         </header>
         <main className="flex-grow p-4">
           <Outlet /> {/* This renders the nested routes */}

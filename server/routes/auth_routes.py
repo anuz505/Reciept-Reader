@@ -28,17 +28,32 @@ def register():
 
     return jsonify({"message": "User registered sucessfullly"}),201
 
-
 @auth_bp.route('/login', methods=["POST"])
 def login():
     db = auth_bp.db
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    
-    user = db.users.find_one({"email": email})
-    if user and check_password_hash(user['password'], password):
-        access_token = create_access_token(identity=ObjectId(user["_id"]))
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "Missing request data"}), 400
+            
+        email = data.get('email')
+        password = data.get('password')
+        
+        if not email or not password:
+            return jsonify({"message": "Email and password are required"}), 400
+        
+        user = db.users.find_one({"email": email})
+        if not user:
+            return jsonify({"message": "Invalid credentials"}), 401
+            
+        if not check_password_hash(user['password'], password):
+            return jsonify({"message": "Invalid credentials"}), 401
+        
+        # Generate JWT token
+        access_token = create_access_token(
+            identity=str(user["_id"]),
+            expires_delta=None  # You can set expiration time here
+        )
         
         # Create response with user data
         response = make_response(jsonify({
@@ -54,16 +69,17 @@ def login():
             'access_token', 
             access_token, 
             httponly=True, 
-            samesite="None",  # Less strict than 'Strict', allows some cross-site requests
+            samesite="None",
             max_age=2592000,  # 30 days
-            secure=True,   # Enable in production with HTTPS
+            secure=True,
             path='/',
             partitioned=True         
-            )
+        )
         
         return response
-    else:
-        return jsonify({"message": "Invalid credentials"}), 401
+        
+    except Exception as e:
+        return jsonify({"message": f"Login error: {str(e)}"}), 500
 
 
 

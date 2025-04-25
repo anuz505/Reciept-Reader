@@ -9,8 +9,8 @@ from flask_jwt_extended import JWTManager
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
-
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}}, supports_credentials=True)
+    CORS(auth_bp, origins=["http://localhost:5173"], supports_credentials=True)
 
     # Initialize the database
     db, fs = init_db(app)

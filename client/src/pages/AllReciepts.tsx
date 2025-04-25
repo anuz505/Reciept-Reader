@@ -49,15 +49,14 @@ const AllReceipts: React.FC = () => {
   const [deleteShowModal, setDeleteShowModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [recieptToDelte, setReceiptToDelete] = useState<string | null>("");
   const navigate = useNavigate();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/auth/login" replace />;
-  }
-
   useEffect(() => {
-    fetchReceipts();
-  }, []);
+    if (isAuthenticated) {
+      fetchReceipts();
+    }
+  }, [isAuthenticated]);
 
   const fetchReceipts = async () => {
     setLoading(true);
@@ -156,6 +155,23 @@ const AllReceipts: React.FC = () => {
     fileInputRef.current?.click();
   };
 
+  const handleDelete = async (reciept_id: string) => {
+    setIsDeleting(true);
+    try {
+      await api.delete(`reciepts/deleteEntry?id=${reciept_id}`);
+      setReceipts((prevReceipts) =>
+        prevReceipts.filter((receipt) => receipt._id.$oid !== reciept_id)
+      );
+    } catch (err) {
+      setDeleteError("Failed to delete receipt. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -172,19 +188,6 @@ const AllReceipts: React.FC = () => {
     );
   }
 
-  const handleDelete = async (reciept_id: string) => {
-    setIsDeleting(true);
-    try {
-      await api.delete(`reciepts/deleteEntry?id=${reciept_id}`);
-      setReceipts((prevReceipts) =>
-        prevReceipts.filter((receipt) => receipt._id.$oid !== reciept_id)
-      );
-    } catch (err) {
-      setDeleteError("Failed to delete receipt. Please try again.");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -254,7 +257,10 @@ const AllReceipts: React.FC = () => {
                       </h3>
                       <button
                         className="bg-red-400 text-white hover:bg-red-500 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 tran flex items-center px-1 py-1 rounded mb-5"
-                        onClick={() => setDeleteShowModal(true)}
+                        onClick={() => {
+                          setDeleteShowModal(true);
+                          setReceiptToDelete(receipt._id.$oid);
+                        }}
                       >
                         <Trash className="mr-1 " />
                       </button>
@@ -300,6 +306,7 @@ const AllReceipts: React.FC = () => {
               }`}
               onClick={() => {
                 setDeleteShowModal(false);
+                setReceiptToDelete(null);
               }}
             >
               {/* Delete Modal */}
@@ -309,7 +316,10 @@ const AllReceipts: React.FC = () => {
                     Confirm Deletion
                   </h2>
                   <button
-                    onClick={() => setDeleteShowModal(false)}
+                    onClick={() => {
+                      setDeleteShowModal(false);
+                      setReceiptToDelete(null);
+                    }}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     <X className="h-6 w-6" />
@@ -322,11 +332,8 @@ const AllReceipts: React.FC = () => {
                 <div className="flex justify-end space-x-4">
                   <button
                     onClick={() => {
-                      const receiptToDelete = receipts.find(
-                        (receipt) => receipt
-                      );
-                      if (receiptToDelete) {
-                        handleDelete(receiptToDelete._id.$oid);
+                      if (recieptToDelte) {
+                        handleDelete(recieptToDelte);
                         setDeleteShowModal(false);
                       }
                     }}
@@ -335,7 +342,10 @@ const AllReceipts: React.FC = () => {
                     Delete
                   </button>
                   <button
-                    onClick={() => setDeleteShowModal(false)}
+                    onClick={() => {
+                      setDeleteShowModal(false);
+                      setReceiptToDelete(null);
+                    }}
                     className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-300"
                   >
                     Cancel
@@ -357,13 +367,7 @@ const AllReceipts: React.FC = () => {
         </div>
       )}
       {showUploadModal && (
-        <div
-          className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => {
-            setShowUploadModal(false);
-            setUploadStatus("");
-          }}
-        >
+        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-300 shadow-lg">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">

@@ -39,8 +39,6 @@ export const checkAuth = createAsyncThunk(
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
-      // const response = await axios.get("http://127.0.0.1:5000/auth/checkAuth");
-
       return response.data as User;
     } catch (error: any) {
       // Don't trigger failure state for 401 errors during initial load

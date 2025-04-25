@@ -4,7 +4,7 @@ import { FaReceipt, FaUpload, FaChartBar, FaHistory } from "react-icons/fa";
 import "./Home.css";
 import Illustartion from "../assets/receipt_scanning.svg";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/common/navbar";
+import Nav from "@/components/common/navbar";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -37,10 +37,10 @@ const Home: React.FC = () => {
 
   return (
     <div className="container">
-      <Navbar />
+      <Nav />
       <div className="home-container">
         <motion.div
-          className="hero-section"
+          className="hero-section mt-0 p-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}

@@ -1,5 +1,4 @@
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
-import Home from "@/pages/Home";
 import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 export function DashboardLayout() {

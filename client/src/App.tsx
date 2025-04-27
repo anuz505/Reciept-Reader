@@ -12,6 +12,7 @@ import RedirectIfAuthenticated from "./pages/auth/RedirectIfAuthenticated";
 import RegisterAuth from "./pages/auth/Register";
 import AllReceipts from "./pages/AllReciepts";
 import ImageReciept from "./pages/RecieptDetails";
+import Profile from "./pages/Profile.tsx";
 function App() {
   const { user, isAuthenticated, isLoading, verifyAuthentication } = useAuth();
   useEffect(() => {
@@ -62,6 +63,14 @@ function App() {
           />
           <Route path="reciept_img/:id" element={<ImageReciept />} />
         </Route>
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        ></Route>
 
         {/* Profile Routes */}
         {/* <Route path="logout" element={<Logout />} /> */}

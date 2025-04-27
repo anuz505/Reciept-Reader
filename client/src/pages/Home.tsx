@@ -71,7 +71,7 @@ const Home: React.FC = () => {
             >
               <button
                 className="primary-button"
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate("/Dashboard")}
               >
                 Get Started
               </button>
@@ -129,7 +129,7 @@ const Home: React.FC = () => {
           <p>Join thousands of users who are saving time with Receipt Reader</p>
           <button
             className="primary-button large"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/Dashboard")}
           >
             Let's get Started
           </button>

@@ -91,10 +91,26 @@ export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      await api.post("/auth/logout");
+      // Get the token from localStorage
+      const token = localStorage.getItem("access_token");
+
+      // Send the token in the Authorization header
+      await api.post(
+        "/auth/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Clear the token
       localStorage.removeItem("access_token");
       return null;
     } catch (error: any) {
+      // Still clear the token on error
+      localStorage.removeItem("access_token");
       return rejectWithValue(error.message);
     }
   }

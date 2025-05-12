@@ -14,13 +14,14 @@ def create_app():
 
 
     # Initialize the database
-    db, fs = init_db(app)
+    try:
+        db, fs = init_db(app)
+    except Exception as e:
+        print("Database connection error \n",e)
+
 
     jwt = JWTManager(app)
     auth_bp.db = db
     register_blueprints(app,db,fs)
     
-    @app.route('/home')
-    def home():
-        return jsonify({"message": "Welcome to the Receipt Reader API"})
     return app

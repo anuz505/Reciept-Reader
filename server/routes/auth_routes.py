@@ -83,13 +83,23 @@ def login():
 
 
 
-@auth_bp.route('/logout',methods = ["POST"])
+@auth_bp.route('/logout', methods=["POST"])
 @jwt_required()
 def logout():
-    response = make_response(redirect(url_for('home')))
-    response.set_cookie('access_token', '', expires=0)
-    return response
-
+    # Create a JSON response
+    response = jsonify({"message": "Logout successful"})
+    
+    # Clear the cookie
+    response.set_cookie('access_token', '', 
+                        expires=0, 
+                        httponly=True,
+                        samesite="None",
+                        secure=True,
+                        path='/',
+                        partitioned=True)
+    
+    # Return success status code
+    return response, 200
 
 @auth_bp.route('/checkAuth',methods = ["GET"])
 @jwt_required()

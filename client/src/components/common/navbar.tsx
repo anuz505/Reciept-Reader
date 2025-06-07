@@ -98,7 +98,7 @@ const Nav = () => {
             : "bg-transparent py-4"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between mr-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo area */}
           <div className="flex items-center" onClick={() => navigate("/")}>
             <motion.div

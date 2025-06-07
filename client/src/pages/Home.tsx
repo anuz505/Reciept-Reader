@@ -36,11 +36,11 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <div className="container">
+    <div className="w-full">
       <Nav />
       <div className="home-container">
         <motion.div
-          className="hero-section mt-0 p-0"
+          className="hero-section"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}

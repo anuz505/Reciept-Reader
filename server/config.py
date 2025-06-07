@@ -5,6 +5,7 @@ from datetime import timedelta
 load_dotenv()
 
 class Config():
+    FLASK_SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
     MONGO_URI = os.getenv("MONGO_URI")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_TOKEN_LOCATION = ["headers", "cookies"]

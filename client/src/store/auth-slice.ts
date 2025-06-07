@@ -7,10 +7,13 @@ interface Credentials {
   password: string;
   username?: string;
 }
+
 interface User {
   id: string;
   username: string;
   email: string;
+  auth_provider?: string;
+  profile_picture?: string;
 }
 
 // Create a reusable axios instance with common config
@@ -54,6 +57,7 @@ export const checkAuth = createAsyncThunk(
     }
   }
 );
+
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (credentials: Credentials, { rejectWithValue }) => {
@@ -87,6 +91,48 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// New OAuth login thunk
+export const initiateOAuthLogin = createAsyncThunk(
+  "auth/oauthLogin",
+  async (provider: string, { rejectWithValue }) => {
+    try {
+      // Redirect to OAuth provider
+      window.location.href = `http://127.0.0.1:5000/auth/login/${provider}`;
+      // This thunk doesn't return anything since we're redirecting
+      return null;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Handle OAuth callback (when user returns from OAuth provider)
+export const handleOAuthCallback = createAsyncThunk(
+  "auth/oauthCallback",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Check if we have a token in cookies after OAuth redirect
+      const token = Cookies.get("access_token");
+
+      if (!token) {
+        throw new Error("No access token found after OAuth login");
+      }
+
+      // Store token in localStorage as backup
+      localStorage.setItem("access_token", token);
+
+      // Get user information
+      const response = await api.get("/auth/checkAuth", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return response.data as User;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
@@ -107,14 +153,17 @@ export const logoutUser = createAsyncThunk(
 
       // Clear the token
       localStorage.removeItem("access_token");
+      Cookies.remove("access_token");
       return null;
     } catch (error: any) {
       // Still clear the token on error
       localStorage.removeItem("access_token");
+      Cookies.remove("access_token");
       return rejectWithValue(error.message);
     }
   }
 );
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -122,10 +171,14 @@ const authSlice = createSlice({
     isAuthenticated: false,
     status: "idle",
     error: null as string | null,
+    oauthLoading: false,
   },
   reducers: {
     resetAuthError: (state) => {
       state.error = null;
+    },
+    setOAuthLoading: (state, action) => {
+      state.oauthLoading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -175,9 +228,31 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.status = "idle";
         state.error = null;
+      })
+      // OAuth cases
+      .addCase(initiateOAuthLogin.pending, (state) => {
+        state.oauthLoading = true;
+        state.error = null;
+      })
+      .addCase(initiateOAuthLogin.rejected, (state, action) => {
+        state.oauthLoading = false;
+        state.error = action.payload as string | null;
+      })
+      .addCase(handleOAuthCallback.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+        state.oauthLoading = false;
+      })
+      .addCase(handleOAuthCallback.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string | null;
+        state.isAuthenticated = false;
+        state.oauthLoading = false;
       });
   },
 });
 
-export const { resetAuthError } = authSlice.actions;
+export const { resetAuthError, setOAuthLoading } = authSlice.actions;
 export default authSlice.reducer;

@@ -27,14 +27,16 @@ interface Receipt {
   fileID: { $oid: string };
 }
 
-const api = axios.create({
-  baseURL: "http://127.0.0.1:5000",
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-  },
-});
+const getApi = () => {
+  return axios.create({
+    baseURL: "http://127.0.0.1:5000",
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  });
+};
 
 const AllReceipts: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -61,6 +63,7 @@ const AllReceipts: React.FC = () => {
   const fetchReceipts = async () => {
     setLoading(true);
     try {
+      const api = getApi();
       const response = await api.get("reciepts/allEntries");
 
       // Check if response.data is an array or a single object
@@ -158,6 +161,7 @@ const AllReceipts: React.FC = () => {
   const handleDelete = async (reciept_id: string) => {
     setIsDeleting(true);
     try {
+      const api = getApi();
       await api.delete(`reciepts/deleteEntry?id=${reciept_id}`);
       setReceipts((prevReceipts) =>
         prevReceipts.filter((receipt) => receipt._id.$oid !== reciept_id)

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useAuth } from "@/hooks/useAuth";
 import { logoutUser } from "@/store/auth-slice";
-import { useDispatch, UseDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import {
   User as UserIcon,
@@ -12,7 +12,6 @@ import {
   Edit,
   Camera,
   ShieldAlert,
-  History,
   X,
   Upload,
   LucideLogOut,
@@ -272,9 +271,11 @@ const Profile: React.FC = () => {
                         />
                         Edit Profile
                       </button>
-                      <button className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors border border-gray-200 flex items-center justify-center sm:justify-start text-sm sm:text-base">
+                      <button
+                        onClick={handleLogout}
+                        className="flex-1 sm:flex-none bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors border border-gray-200 flex items-center justify-center sm:justify-start text-sm sm:text-base"
+                      >
                         <LucideLogOut
-                          onClick={handleLogout}
                           size={16}
                           className="mr-1.5 sm:mr-2 flex-shrink-0"
                         />

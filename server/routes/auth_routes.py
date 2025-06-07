@@ -2,8 +2,28 @@ from flask import Blueprint,jsonify,request,make_response,redirect,url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity
 from bson import ObjectId
-
+from authlib.integrations.flask_client import OAuth
+import os
 auth_bp  = Blueprint('auth',__name__)
+
+oauth =OAuth()
+
+google = oauth.register(
+    name="google",
+    client_id=os.getenv("CLIENT_ID"),
+    client_secret=os.getenv("CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile',
+        'access_type': 'offline',  # For refresh token
+        'include_granted_scopes': 'true',  # Enable incremental authorization
+        'prompt': 'consent'  # Force consent screen to ensure refresh token
+    }
+)
+
+def init_oauth(app):
+    oauth.init_app(app)
+
 @auth_bp.route('/register',methods=["POST"])
 def register():
     db = auth_bp.db
@@ -121,5 +141,53 @@ def get_current_user():
     except Exception as e:
         return jsonify({"msg": f"Authentication error: {str(e)}"}), 401
 
+@auth_bp.route("/login/google")
+def googlelogin():
+    redirect_uri = url_for("auth.google_authorize",_external=True)
+    return google.authorize_redirect(redirect_uri)
 
-    
+
+@auth_bp.route("/login/google/callback")
+def google_authorize():
+    try:
+        db = auth_bp.db
+        token = google.authorize_access_token()
+        granted_scopes = token.get('scope', '').split(' ')
+
+        resp = google.get("userinfo")
+        user_info = resp.json()
+
+        email = user_info['email']
+        existing_user = db.users.find_one({"email": email})
+
+        if existing_user:
+            user_id = str(existing_user['_id'])
+        else:
+            new_user = {
+                    "username": user_info.get("name", email.split("@")[0]),
+                    "email": email,
+                    "password": None,
+                    "auth_provider": "google",
+                    "google_id": user_info.get('id'),
+                    "profile_picture": user_info.get('picture'),
+                    "granted_scopes": granted_scopes  # Store granted scopes
+                }
+            result = db.users.insert_one(new_user)
+            user_id = str(result.inserted_id)
+
+        access_token = create_access_token(identity=user_id)
+        response = make_response(redirect("http://localhost:5173/auth/login"))
+        response.set_cookie(
+                'access_token', 
+                access_token,
+                httponly=True,
+                samesite="Lax",  # Changed from "None" for development
+                max_age=2592000,
+                secure=False,  # For local development
+                path='/'
+            )
+            
+        return response
+    except Exception as e:
+        print(f"Google OAuth error: {str(e)}")
+        return redirect("http://localhost:5173/auth/login?error=oauth_failed")

@@ -132,4 +132,52 @@ def reciept_img():
 
     except Exception as e:
         return jsonify({"error":str(e)})
+    
+
+@reciept_bp.route("/search",methods=["GET"])
+@jwt_required()
+def search_receipts():
+    try:
+        db = reciept_bp.db
+        user_id = get_jwt_identity()
+
+        query = request.args.get("query","") # Get the 'query' parameter from the URL's query string. If it's not provided, default to an empty string.
+        filter_by = request.args.get("filter","all") # the query, default value. so in default it filters by all hai ta
+        if not query:
+            return jsonify({"error": "Search query is required"}), 400  # a bit of error handling
+        
+
+        search_conditions = []
+
+        base_query = {"user_id": ObjectId(user_id)}
+
+
+        if (filter_by =="all" or filter_by == "business"):
+            search_conditions.append({"data.business":{"$regex":query,"$options":"i"}})
+
+        if (filter_by == "all" or filter_by=="date"):
+            search_conditions.append({"data.date":{"$regex":query,"$options":"i"}})
+        if filter_by == 'all' or filter_by == 'items':
+            # Search in item names
+            search_conditions.append({"data.items.name": {"$regex": query, "$options": "i"}})
+        if filter_by == 'all':
+            # Also search in address
+            search_conditions.append({"data.address": {"$regex": query, "$options": "i"}})
+
+        if search_conditions:      # here, $and and $or are mongodb queries also, this combine all conditions with the base query
+
+            search_query = {
+                "$and": [
+                    base_query,
+                    {"$or": search_conditions}
+                ]
+            }
+        else:
+            search_query = base_query
+        
+        results = list(db.inventory.find(search_query))
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": f"Search error: {str(e)}"}),500
+
         

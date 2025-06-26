@@ -4,6 +4,8 @@ from flask_jwt_extended import create_access_token,jwt_required,get_jwt_identity
 from bson import ObjectId
 from authlib.integrations.flask_client import OAuth
 import os
+import traceback
+
 auth_bp  = Blueprint('auth',__name__)
 
 oauth =OAuth()
@@ -14,10 +16,10 @@ google = oauth.register(
     client_secret=os.getenv("CLIENT_SECRET"),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
-        'scope': 'openid email profile',
-        'access_type': 'offline',  # For refresh token
-        'include_granted_scopes': 'true',  # Enable incremental authorization
-        'prompt': 'consent'  # Force consent screen to ensure refresh token
+        'scope': 'openid email profile',  # Add more scopes as needed
+        'access_type': 'offline',
+        'include_granted_scopes': 'true',
+        'prompt': 'consent'
     }
 )
 
@@ -177,17 +179,21 @@ def google_authorize():
 
         access_token = create_access_token(identity=user_id)
         response = make_response(redirect("http://localhost:5173/auth/login"))
+       
         response.set_cookie(
-                'access_token', 
-                access_token,
-                httponly=True,
-                samesite="Lax",  # Changed from "None" for development
-                max_age=2592000,
-                secure=False,  # For local development
-                path='/'
-            )
+            'access_token', 
+            access_token, 
+            httponly=True, 
+            samesite="None",
+            max_age=2592000,  # 30 days
+            secure=True,
+            path='/',
+            partitioned=True         
+        )
             
         return response
     except Exception as e:
         print(f"Google OAuth error: {str(e)}")
-        return redirect("http://localhost:5173/auth/login?error=oauth_failed")
+        # Improve this to log the full exception details
+        traceback.print_exc()  # Print full stack trace
+        return redirect(f"http://localhost:5173/auth/login?error={str(e)}")

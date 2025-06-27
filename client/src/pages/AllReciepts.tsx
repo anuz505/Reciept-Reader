@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { Trash, X } from "lucide-react";
+import SearchBar from "@/components/app/searchbar.tsx";
 
 interface Item {
   name: string;
@@ -52,6 +53,7 @@ const AllReceipts: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [recieptToDelte, setReceiptToDelete] = useState<string | null>("");
+  const [searchResults, setSearchResults] = useState<Receipt[] | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -172,6 +174,27 @@ const AllReceipts: React.FC = () => {
       setIsDeleting(false);
     }
   };
+
+  const handleSearch = async (query: string, filter: string = "all") => {
+    if (!query.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    try {
+      const api = getApi();
+      const response = await api.get(
+        `reciepts/search?query=${encodeURIComponent(query)}&filter=${filter}`
+      );
+      setSearchResults(response.data);
+    } catch (error) {
+      console.error("search failed", error);
+      setError("Search Failed. Please try again.");
+    }
+  };
+  const clearSearch = () => {
+    setSearchResults(null);
+  };
+
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
@@ -191,7 +214,7 @@ const AllReceipts: React.FC = () => {
       </div>
     );
   }
-
+  const displayedReceipts = searchResults !== null ? searchResults : receipts;
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -218,16 +241,35 @@ const AllReceipts: React.FC = () => {
         </button>
       </div>
 
-      {receipts.length === 0 ? (
-        <div className="text-center text-gray-500 py-10">No receipts found</div>
+      {/*Search Bar*/}
+      <SearchBar onSearch={handleSearch} className="mb-6" />
+      {/* Show search info if results are being shown */}
+      {searchResults !== null && (
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-600">
+            Showing {searchResults.length} search results
+          </p>
+          <button
+            onClick={clearSearch}
+            className="text-sm text-blue-500 hover:underline"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
+      {displayedReceipts.length === 0 ? (
+        <div className="text-center text-gray-500 py-10">
+          {searchResults !== null
+            ? "No matching receipts found"
+            : "No receipts found"}
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {receipts.map((receipt) => {
+          {displayedReceipts.map((receipt) => {
             // Additional safety check before rendering
             if (!receipt || !receipt.data) {
               return null;
             }
-
             return (
               <div
                 key={receipt._id.$oid}
@@ -301,6 +343,7 @@ const AllReceipts: React.FC = () => {
               </div>
             );
           })}
+          )
           {deleteShowModal && (
             <div
               className={`fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ${

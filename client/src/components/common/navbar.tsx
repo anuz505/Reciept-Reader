@@ -23,23 +23,16 @@ const NavLinks = () => {
 
   return (
     <>
-      <NavLink to="/mainDashboard" className={activeStyleCallback}>
+      <NavLink to="/" className={activeStyleCallback}>
         <div className="flex items-center gap-1.5">
           <Home className="w-4 h-4" />
-          <span>Dashboard</span>
+          <span>Home</span>
         </div>
       </NavLink>
       <NavLink to="/Dashboard" className={activeStyleCallback}>
         <div className="flex items-center gap-1.5">
           <Receipt className="w-4 h-4" />
           <span>Reciepts</span>
-        </div>
-      </NavLink>
-
-      <NavLink to="/analytics" className={activeStyleCallback}>
-        <div className="flex items-center gap-1.5">
-          <BarChart2 className="w-4 h-4" />
-          <span>Analytics</span>
         </div>
       </NavLink>
 
@@ -192,7 +185,7 @@ const Nav = () => {
                 className="hover:bg-blue-50 rounded-lg transition-colors"
               >
                 <NavLink
-                  to="/analytics"
+                  to="/"
                   className={({ isActive }) =>
                     isActive
                       ? "block font-medium text-blue-600 p-3"
@@ -201,7 +194,7 @@ const Nav = () => {
                 >
                   <div className="flex items-center gap-2">
                     <BarChart2 className="w-5 h-5" />
-                    <span>Analytics</span>
+                    <span>Home</span>
                   </div>
                 </NavLink>
               </motion.div>

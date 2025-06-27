@@ -25,7 +25,6 @@ export const useAuth = () => {
   };
 
   return {
-    user,
     isAuthenticated,
     isLoading,
     error,

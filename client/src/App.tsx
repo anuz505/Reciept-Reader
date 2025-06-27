@@ -14,7 +14,7 @@ import AllReceipts from "./pages/AllReciepts";
 import ImageReciept from "./pages/RecieptDetails";
 import Profile from "./pages/Profile.tsx";
 function App() {
-  const { user, isAuthenticated, isLoading, verifyAuthentication } = useAuth();
+  const { isAuthenticated, isLoading, verifyAuthentication } = useAuth();
   useEffect(() => {
     verifyAuthentication();
   }, []);
@@ -71,10 +71,6 @@ function App() {
             </ProtectedRoute>
           }
         ></Route>
-
-        {/* Profile Routes */}
-        {/* <Route path="logout" element={<Logout />} /> */}
-        {/* </Route> */}
 
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
